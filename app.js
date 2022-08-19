@@ -57,4 +57,33 @@ app.get("/players", async (req, res) => {
   res.send(processedPlayerData);
 });
 
+/*
+    End-Point 2: /players/:playerId
+    ------------
+    To fetch specific player data
+    from player_details table
+*/
+app.get("/players/:playerId", async (req, res) => {
+  const { playerId } = req.params;
+
+  const queryToGetSpecificPlayerData = `
+    SELECT
+        *
+    FROM
+        player_details
+    WHERE
+        player_id = ${playerId};
+    `;
+
+  const specificPlayerData = await cricketMatchDetailsDBConnectionObj.get(
+    queryToGetSpecificPlayerData
+  );
+  const processedPlayerData = {
+    playerId: specificPlayerData.player_id,
+    playerName: specificPlayerData.player_name,
+  };
+
+  res.send(processedPlayerData);
+});
+
 module.exports = app;
