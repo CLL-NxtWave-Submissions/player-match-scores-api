@@ -86,4 +86,28 @@ app.get("/players/:playerId", async (req, res) => {
   res.send(processedPlayerData);
 });
 
+/*
+    End-Point 3: PUT /players/:playerId
+    ------------
+    To update details of specific player
+    in the table player_details, with 
+    id: playerId
+*/
+app.put("/players/:playerId", async (req, res) => {
+  const { playerId } = req.params;
+  const { playerName } = req.body;
+
+  const queryToUpdateSpecificPlayerData = `
+    UPDATE
+        player_details
+    SET
+        player_name = '${playerName}'
+    WHERE
+        player_id = ${playerId};
+    `;
+
+  await cricketMatchDetailsDBConnectionObj.run(queryToUpdateSpecificPlayerData);
+  res.send("Player Details Updated");
+});
+
 module.exports = app;
