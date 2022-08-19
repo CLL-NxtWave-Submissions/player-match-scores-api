@@ -31,3 +31,30 @@ const initializeDBAndServer = async () => {
 };
 
 initializeDBAndServer();
+
+/*
+    End-Point 1: GET /players
+    ------------
+    To fetch all player data from
+    the player_details table
+*/
+app.get("/players", async (req, res) => {
+  const queryToFetchAllPlayerData = `
+    SELECT
+        *
+    FROM
+        player_details;
+    `;
+
+  const allPlayerData = await cricketMatchDetailsDBConnectionObj.all(
+    queryToFetchAllPlayerData
+  );
+  const processedPlayerData = allPlayerData.map((singlePlayerData) => ({
+    playerId: singlePlayerData.player_id,
+    playerName: singlePlayerData.player_name,
+  }));
+
+  res.send(processedPlayerData);
+});
+
+module.exports = app;
