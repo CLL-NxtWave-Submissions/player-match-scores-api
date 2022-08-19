@@ -225,4 +225,44 @@ app.get("/matches/:matchId/players", async (req, res) => {
   res.send(processedPlayersDataOfSpecificMatch);
 });
 
+/*
+    End-Point 7: /players/:playerId/playerScores
+    ------------
+    To fetch aggregated player scores along with
+    player data for a specific player with id: playerId
+*/
+app.get("/players/:playerId/playerScores", async (req, res) => {
+  const { playerId } = req.params;
+
+  const queryToGetAggregatedPlayerScoresForSpecificPlayer = `
+    SELECT
+        temp_player_details_match_score.player_id,
+        temp_player_details_match_score.player_name,
+        SUM(temp_player_details_match_score.score) AS total_score,
+        SUM(temp_player_details_match_score.fours) AS total_fours,
+        SUM(temp_player_details_match_score.sixes) AS total_sixes
+    FROM
+        (player_details
+            INNER JOIN
+                player_match_score
+            ON
+                player_details.player_id = player_match_score.player_id) AS temp_player_details_match_score
+    WHERE
+            temp_player_details_match_score.player_id = ${playerId};
+    `;
+
+  const aggregatedPlayerStatsDataForSpecificPlayer = await cricketMatchDetailsDBConnectionObj.get(
+    queryToGetAggregatedPlayerScoresForSpecificPlayer
+  );
+  const processedAggregatedPlayerStatsDataForSpecificPlayer = {
+    playerId: aggregatedPlayerStatsDataForSpecificPlayer.player_id,
+    playerName: aggregatedPlayerStatsDataForSpecificPlayer.player_name,
+    totalScore: aggregatedPlayerStatsDataForSpecificPlayer.total_score,
+    totalFours: aggregatedPlayerStatsDataForSpecificPlayer.total_fours,
+    totalSixes: aggregatedPlayerStatsDataForSpecificPlayer.total_sixes,
+  };
+
+  res.send(processedAggregatedPlayerStatsDataForSpecificPlayer);
+});
+
 module.exports = app;
