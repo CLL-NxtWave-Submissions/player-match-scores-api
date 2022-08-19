@@ -141,4 +141,46 @@ app.get("/matches/:matchId", async (req, res) => {
   res.send(processedMatchData);
 });
 
+/*
+    End-Point 5: /players/:playerId/matches
+    ------------
+    To fetch details of matches played by
+    specific player with id: playerId
+*/
+app.get("/players/:playerId/matches", async (req, res) => {
+  const { playerId } = req.params;
+
+  const queryToFetchMatchDataForSpecificPlayer = `
+    SELECT DISTINCT
+        temp_player_match_details_score.match_id,
+        temp_player_match_details_score.match,
+        temp_player_match_details_score.year
+    FROM
+        ((player_details
+        INNER JOIN 
+            player_match_score
+        ON 
+            player_details.player_id = player_match_score.player_id) as temp_player_details_match_score
+        INNER JOIN
+            match_details
+        ON
+            temp_player_details_match_score.match_id = match_details.match_id) AS temp_player_match_details_score
+    WHERE
+        temp_player_match_details_score.player_id = ${playerId};
+    `;
+
+  const matchesDataOfSpecificPlayer = await cricketMatchDetailsDBConnectionObj.all(
+    queryToFetchMatchDataForSpecificPlayer
+  );
+  const processedMatchesDataOfSpecificPlayer = matchesDataOfSpecificPlayer.map(
+    (singleMatchData) => ({
+      matchId: singleMatchData.match_id,
+      match: singleMatchData.match,
+      year: singleMatchData.year,
+    })
+  );
+
+  res.send(processedMatchesDataOfSpecificPlayer);
+});
+
 module.exports = app;
