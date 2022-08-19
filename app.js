@@ -110,4 +110,35 @@ app.put("/players/:playerId", async (req, res) => {
   res.send("Player Details Updated");
 });
 
+/*
+    End-Point 4: GET /matches/:matchId
+    ------------
+    To fetch data of specific match
+    from the table match_details with
+    id: matchId
+*/
+app.get("/matches/:matchId", async (req, res) => {
+  const { matchId } = req.params;
+
+  const queryToFetchSpecificMatchData = `
+    SELECT
+        *
+    FROM
+        match_details
+    WHERE
+        match_id = ${matchId};
+    `;
+
+  const specificMatchData = await cricketMatchDetailsDBConnectionObj.get(
+    queryToFetchSpecificMatchData
+  );
+  const processedMatchData = {
+    matchId: specificMatchData.match_id,
+    match: specificMatchData.match,
+    year: specificMatchData.year,
+  };
+
+  res.send(processedMatchData);
+});
+
 module.exports = app;
